@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Event Availability</title>
+
+<style>
+body{
+font-family: Arial;
+margin:40px;
+}
+
+table{
+border-collapse: collapse;
+}
+
+td,th{
+border:1px solid #ccc;
+padding:10px;
+text-align:center;
+}
+
+.available{
+background:#90ee90;
+}
+
+.maybe{
+background:#ffd966;
+}
+
+.unavailable{
+background:#ff9999;
+}
+
+button{
+padding:8px;
+margin:2px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Event Availability</h1>
+
+<label>Name:</label>
+<input id="name">
+
+<table id="calendar">
+<tr>
+<th>Date</th>
+<th>Status</th>
+</tr>
+</table>
+
+<br>
+
+<button onclick="save()">Save</button>
+
+<h2>Admin View</h2>
+<button onclick="loadAdmin()">Load Responses</button>
+
+<div id="admin"></div>
+
+<script>
+
+const dates = [
+"June 10",
+"June 11",
+"June 12",
+"June 13",
+"June 14"
+]
+
+const table = document.getElementById("calendar")
+
+dates.forEach(date => {
+
+let row = document.createElement("tr")
+
+let d = document.createElement("td")
+d.innerText = date
+
+let s = document.createElement("td")
+
+let a = document.createElement("button")
+a.innerText = "Available"
+a.onclick = () => setStatus(s,"available")
+
+let m = document.createElement("button")
+m.innerText = "Maybe"
+m.onclick = () => setStatus(s,"maybe")
+
+let u = document.createElement("button")
+u.innerText = "Unavailable"
+u.onclick = () => setStatus(s,"unavailable")
+
+s.appendChild(a)
+s.appendChild(m)
+s.appendChild(u)
+
+row.appendChild(d)
+row.appendChild(s)
+
+table.appendChild(row)
+
+})
+
+function setStatus(cell,status){
+
+cell.className = status
+cell.dataset.status = status
+
+}
+
+function save(){
+
+let name = document.getElementById("name").value
+
+let responses = []
+
+document.querySelectorAll("#calendar tr").forEach((row,i)=>{
+
+if(i===0) return
+
+let date = row.children[0].innerText
+let status = row.children[1].dataset.status || "none"
+
+responses.push({date,status})
+
+})
+
+let data = {
+name,
+responses
+}
+
+let all = JSON.parse(localStorage.getItem("calendarData") || "[]")
+all.push(data)
+
+localStorage.setItem("calendarData",JSON.stringify(all))
+
+alert("Saved!")
+
+}
+
+function loadAdmin(){
+
+let data = JSON.parse(localStorage.getItem("calendarData") || "[]")
+
+let div = document.getElementById("admin")
+
+div.innerHTML = ""
+
+data.forEach(person=>{
+
+let p = document.createElement("p")
+
+p.innerText = [person.name](http://person.name/) + ": " + JSON.stringify(person.responses)
+
+div.appendChild(p)
+
+})
+
+}
+
+</script>
+
+</body>
+</html>
