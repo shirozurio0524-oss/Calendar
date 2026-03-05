@@ -1,0 +1,52 @@
+<!DOCTYPE html> <html> <head> <meta charset="UTF-8"> <title>Event Availability</title>
+<style> body{ font-family:Arial; margin:40px; }
+table{ border-collapse:collapse; }
+td,th{ border:1px solid #ccc; padding:10px; text-align:center; }
+.available{background:#90ee90;} .maybe{background:#ffd966;} .unavailable{background:#ff9999;}
+button{padding:8px;margin:2px;} </style>
+</head>
+<body>
+<h1>Event Availability</h1>
+<label>Name:</label> <input id="name">
+<table id="calendar"> <tr> <th>Date</th> <th>Status</th> </tr> </table>
+<br> <button onclick="save()">Save</button>
+<h2>Admin View</h2> <button onclick="loadAdmin()">Load Responses</button>
+<div id="admin"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"; import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "YOUR_API_KEY", authDomain: "YOUR_PROJECT.firebaseapp.com", projectId: "YOUR_PROJECT" };
+const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+const dates = [ "2026-07-01", "2026-07-02", "2026-07-03", "2026-07-04", "2026-07-05" ]
+const calendar = document.getElementById("calendar")
+dates.forEach(date=>{
+let row=document.createElement("tr")
+let d=document.createElement("td") d.innerText=date
+let s=document.createElement("td")
+let status="maybe" s.innerText=status s.className="maybe"
+s.onclick=()=>{
+if(status==="maybe"){ status="available" s.className="available" } else if(status==="available"){ status="unavailable" s.className="unavailable" } else{ status="maybe" s.className="maybe" }
+s.innerText=status }
+row.appendChild(d) row.appendChild(s) calendar.appendChild(row)
+})
+async function save(){
+const name=document.getElementById("name").value
+if(!name){ alert("Enter name") return }
+const rows=calendar.rows
+for(let i=1;i<rows.length;i++){
+let date=rows[i].cells[0].innerText let status=rows[i].cells[1].innerText
+await addDoc(collection(db,"availability"),{ name, date, status })
+}
+alert("Saved!")
+}
+async function loadAdmin(){
+const querySnapshot = await getDocs(collection(db,"availability"))
+let div=document.getElementById("admin") div.innerHTML=""
+querySnapshot.forEach(doc=>{
+let data=doc.data()
+let p=document.createElement("p")
+p.innerText=${data.name} - ${data.date} : ${data.status}
+div.appendChild(p)
+})
+}
+</script>
+</body> </html>
